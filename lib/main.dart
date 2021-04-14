@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Flutter Api Filter list Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepOrange,
       ),
       home: ExamplePage(),
     );
@@ -27,8 +27,10 @@ class _ExamplePageState extends State<ExamplePage> {
   String _searchText = "";
   List names = [];
   List filteredNames = [];
+  List filteredEmails = [];
+  List filteredAvatar = [];
   Icon _searchIcon = Icon(Icons.search);
-  Widget _appBarTitle = Text('Search Example');
+  Widget _appBarTitle = Text('Search Suggestions');
 
   _ExamplePageState() {
     _filter.addListener(() {
@@ -87,7 +89,11 @@ class _ExamplePageState extends State<ExamplePage> {
       itemCount: names == null ? 0 : filteredNames.length,
       itemBuilder: (BuildContext context, int index) {
         return new ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(filteredAvatar[index]),
+          ),
           title: Text(filteredNames[index]),
+          subtitle: Text(filteredEmails[index]),
           onTap: () => print(filteredNames[index]),
         );
       },
@@ -113,26 +119,30 @@ class _ExamplePageState extends State<ExamplePage> {
   }
 
   void _getNames() async {
-    var url = Uri.parse('https://apps.dd.limited/api/v1/vendor/0');
+    var url = Uri.parse('https://reqres.in/api/users?page=2');
     http.Response response = await http.get(
       url,
-      headers: <String, String>{
-        'Authorization':
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjY0IiwidW5pcXVlX2lkIjoiMjEwNC0xMDI2LVRMSUMwMyIsInBob25lIjoiMDE2Mjc3ODM3MzMiLCJBUElfVElNRSI6MTYxNzkwMjA5OX0.jf35W7uRKI02cf_0-P9pMb1lFEMKG9MzOcGUU9xRyj4',
-        'Customer-ID': '64',
-      },
+      // headers: <String, String>{
+      //   'Authorization':
+      //       '',
+      //   'Customer-ID': '',
+      // },
     );
     var data = json.decode(response.body);
-    print(data['data'][1]['vendor_name']);
-    List tempList = [];
+    List tempListName = [];
+    List tempListEmail = [];
+    List tempListAvatar = [];
     for (int i = 0; i < data['data'].length; i++) {
-      tempList.add(data['data'][i]['vendor_name']);
+      tempListName.add(data['data'][i]['first_name']);
+      tempListEmail.add(data['data'][i]['email']);
+      tempListAvatar.add(data['data'][i]['avatar']);
     }
-    print(tempList);
+    print(tempListName);
     setState(() {
-      names = tempList;
-      names.shuffle();
+      names = tempListName;
       filteredNames = names;
+      filteredEmails = tempListEmail;
+      filteredAvatar = tempListAvatar;
     });
   }
 }
